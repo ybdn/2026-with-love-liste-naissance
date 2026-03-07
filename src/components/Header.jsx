@@ -1,28 +1,25 @@
-import { Link } from 'react-router-dom'
-
 export default function Header() {
   return (
-    <header className="text-center py-10 px-4">
-      <p className="text-rose tracking-[0.3em] uppercase text-xs font-medium mb-2">
+    <header className="text-center py-12 px-4 animate-fade-in-up">
+      <p className="text-rose tracking-[0.3em] uppercase text-xs font-medium mb-3">
         Liste de Naissance
       </p>
-      <h1 className="font-display text-4xl sm:text-5xl font-semibold text-text mb-3">
-        2026 <span className="text-rose italic">with Love</span>
+      <h1 className="font-display text-text mb-4">
+        <span className="text-3xl sm:text-4xl font-semibold tracking-wide">Marine</span>
+        <span className="text-rose text-2xl sm:text-3xl font-normal mx-2 sm:mx-3">&</span>
+        <span className="text-3xl sm:text-4xl font-semibold tracking-wide">Yoann</span>
       </h1>
-      <div className="w-16 h-px bg-rose mx-auto mb-4" />
+      <p className="text-warm/70 text-sm tracking-widest mb-4">08.09.2026</p>
+      <div className="flex items-center justify-center gap-2.5 mb-5">
+        <div className="w-8 h-px bg-rose/40" />
+        <svg width="10" height="9" viewBox="0 0 16 14" fill="none" className="text-rose/50">
+          <path d="M8 14s-5.5-4.2-7.2-7.3C-.3 4.3.5 1.5 3.3.5 5 0 6.8.8 8 2.5 9.2.8 11 0 12.7.5c2.8 1 3.6 3.8 2.5 6.2C13.5 9.8 8 14 8 14z" fill="currentColor" />
+        </svg>
+        <div className="w-8 h-px bg-rose/40" />
+      </div>
       <p className="text-text-light text-sm max-w-md mx-auto leading-relaxed">
         Merci de participer à l'arrivée de notre petit trésor.
-        Choisissez un cadeau et réservez-le en un clic&nbsp;!
       </p>
-      <Link
-        to="/admin"
-        className="inline-flex items-center gap-1.5 mt-5 text-warm/50 text-xs hover:text-warm transition-colors"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
-          <path fillRule="evenodd" d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" clipRule="evenodd" />
-        </svg>
-        Espace Parents
-      </Link>
     </header>
   )
 }

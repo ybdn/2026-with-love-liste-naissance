@@ -53,3 +53,9 @@ create policy "Admin delete"
   on public.items for delete
   to authenticated
   using (true);
+
+-- 6. Ajouter la colonne catégorie
+-- À exécuter séparément si la table existe déjà :
+-- ALTER TABLE public.items ADD COLUMN categorie text DEFAULT NULL CHECK (categorie IN ('sommeil', 'éveil', 'repas', 'allaitement', 'sorties'));
+alter table public.items add column categorie text default null
+  check (categorie in ('sommeil', 'éveil', 'repas', 'allaitement', 'sorties'));

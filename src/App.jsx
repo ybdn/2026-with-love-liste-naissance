@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { supabase } from './lib/supabase'
 import GuestList from './pages/GuestList'
@@ -7,6 +7,11 @@ import AdminDashboard from './pages/AdminDashboard'
 
 export default function App() {
   const [session, setSession] = useState(null)
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
