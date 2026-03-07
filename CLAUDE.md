@@ -34,12 +34,14 @@ src/
 ## Base de données Supabase
 
 **Table `items`** :
+
 - `id` (UUID, PK), `created_at` (timestamptz)
 - `titre` (text, NOT NULL), `description` (text), `prix` (numeric)
 - `lien_url` (text), `image_url` (text)
 - `statut` (text : 'disponible' | 'reserve'), `reserve_par` (text)
 
 **RLS activé** :
+
 - `anon` : SELECT all, UPDATE uniquement si `statut = 'disponible'`
 - `authenticated` : CRUD complet
 
@@ -62,6 +64,13 @@ Le fichier `supabase-setup.sql` contient le script complet à exécuter dans le 
 - **Couleurs** : cream (#FDF8F4), blush (#F5E6DA), rose (#D4A59A), sage (#A8B5A2), warm (#8B7355)
 - **Style** : arrondi (rounded-2xl), ombres douces, transitions subtiles
 
+## Déploiement
+
+- **GitHub repo** : `https://github.com/ybdn/2026-with-love-liste-naissance`
+- **GitHub Pages** : `https://ybdn.github.io/2026-with-love-liste-naissance/`
+- **CI/CD** : GitHub Actions (`.github/workflows/deploy.yml`) — build + deploy auto sur push `main`
+- **Compte admin** : `baudrin.yoann@gmail.com` (créé dans Supabase Auth)
+
 ## État actuel
 
 - [x] Structure projet React + Vite + Tailwind
@@ -69,7 +78,8 @@ Le fichier `supabase-setup.sql` contient le script complet à exécuter dans le 
 - [x] Page invités avec grille, filtres, réservation en 1 clic
 - [x] Page admin avec login, CRUD, mode surprise
 - [x] Script SQL pour table + RLS
-- [ ] Exécuter `supabase-setup.sql` dans Supabase
-- [ ] Créer un compte parent dans Supabase Auth
-- [ ] Déployer sur GitHub Pages (GitHub Actions ou `gh-pages`)
-- [ ] Tester le parcours complet invité + admin
+- [x] Table `items` + RLS créées dans Supabase
+- [x] Compte parent créé dans Supabase Auth
+- [x] Lien « Espace Parents » (🔒) ajouté dans le Header invités
+- [x] Déploiement GitHub Pages via GitHub Actions
+- [ ] Tester le parcours complet invité + admin + mode surprise
