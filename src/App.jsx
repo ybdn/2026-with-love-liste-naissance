@@ -4,6 +4,7 @@ import { supabase } from './lib/supabase'
 import GuestList from './pages/GuestList'
 import AdminLogin from './pages/AdminLogin'
 import AdminDashboard from './pages/AdminDashboard'
+import InventoryPage from './pages/InventoryPage'
 
 export default function App() {
   const [session, setSession] = useState(null)
@@ -26,6 +27,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<GuestList />} />
+      <Route path="/inventaire" element={<InventoryPage />} />
       <Route path="/admin" element={session ? <AdminDashboard session={session} /> : <AdminLogin />} />
     </Routes>
   )

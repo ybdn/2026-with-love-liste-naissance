@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import GiftCard from '../components/GiftCard'
 import AdminGiftForm from '../components/AdminGiftForm'
+import InventoryAdminTab from '../components/InventoryAdminTab'
 
 export default function AdminDashboard({ session }) {
   const [gifts, setGifts] = useState([])
@@ -12,6 +13,7 @@ export default function AdminDashboard({ session }) {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
+  const [activeTab, setActiveTab] = useState('gifts')
 
   const fetchGifts = async () => {
     const { data } = await supabase
@@ -113,6 +115,30 @@ export default function AdminDashboard({ session }) {
             </div>
           ))}
         </div>
+
+        {/* Sélecteur d'onglets */}
+        <div className="flex gap-1 bg-blush/40 p-1 rounded-xl mb-6">
+          <button
+            onClick={() => setActiveTab('gifts')}
+            className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all cursor-pointer ${
+              activeTab === 'gifts' ? 'bg-white text-text shadow-sm' : 'text-text-light hover:text-text'
+            }`}
+          >
+            Cadeaux
+          </button>
+          <button
+            onClick={() => setActiveTab('inventory')}
+            className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all cursor-pointer ${
+              activeTab === 'inventory' ? 'bg-white text-text shadow-sm' : 'text-text-light hover:text-text'
+            }`}
+          >
+            Inventaire
+          </button>
+        </div>
+
+        {activeTab === 'inventory' && <InventoryAdminTab />}
+
+        {activeTab === 'gifts' && (<>
 
         <button
           onClick={() => { setEditingGift(null); setShowForm(true) }}
@@ -239,6 +265,8 @@ export default function AdminDashboard({ session }) {
           </div>
           )
         })()}
+
+        </>)}
       </div>
 
       {showForm && (

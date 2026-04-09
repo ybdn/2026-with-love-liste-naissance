@@ -56,6 +56,12 @@ export default function GuestList() {
             <span className="font-semibold text-text">Un petit mot de notre part 💛</span><br />
             Cette liste nous sert aussi de référence pour nos propres achats — pas besoin de tout offrir ! Chaque geste compte, et nous valorisons tout particulièrement la <span className="font-medium">seconde main</span> : n'hésitez pas à chercher ces articles d'occasion si vous le souhaitez.
           </p>
+          <div className="mt-3 pt-3 border-t border-rose/10">
+            <Link to="/inventaire"
+              className="inline-flex items-center gap-1.5 text-warm text-sm font-medium hover:text-rose transition-colors">
+              📋 Ce qu'on a déjà →
+            </Link>
+          </div>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm mb-6 animate-fade-in-up stagger-3">

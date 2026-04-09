@@ -64,3 +64,29 @@ create policy "Admin delete"
 -- ALTER TABLE public.items ADD COLUMN categorie text DEFAULT NULL CHECK (categorie IN ('sommeil', 'éveil', 'repas', 'allaitement', 'sorties'));
 alter table public.items add column categorie text default null
   check (categorie in ('sommeil', 'éveil', 'repas', 'allaitement', 'sorties'));
+
+-- 7. Table inventaire (ce qu'on a déjà)
+create table public.inventory_items (
+  id uuid default gen_random_uuid() primary key,
+  created_at timestamptz default now(),
+  categorie text not null check (categorie in (
+    'vêtements', 'bodies', 'jouets', 'puériculture', 'bain', 'chambre', 'accessoires', 'autre'
+  )),
+  nom text not null,
+  taille text default null,
+  quantite integer not null default 1 check (quantite >= 0),
+  notes text default null
+);
+
+alter table public.inventory_items enable row level security;
+
+create policy "Inventaire lecture publique" on public.inventory_items
+  for select to anon using (true);
+create policy "Inventaire admin select" on public.inventory_items
+  for select to authenticated using (true);
+create policy "Inventaire admin insert" on public.inventory_items
+  for insert to authenticated with check (true);
+create policy "Inventaire admin update" on public.inventory_items
+  for update to authenticated using (true);
+create policy "Inventaire admin delete" on public.inventory_items
+  for delete to authenticated using (true);
