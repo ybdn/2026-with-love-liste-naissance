@@ -27,11 +27,16 @@ create policy "Lecture publique sans reserve_par"
   using (true);
 
 -- 4. Réservation par les invités (anonymes)
--- Ils ne peuvent modifier QUE statut et reserve_par, et SEULEMENT si l'article est disponible
+-- USING filtre les lignes avant modification (statut doit être disponible)
+-- WITH CHECK (true) valide le nouvel état sans le re-filtrer (sinon 42501 après update)
 create policy "Reservation par invites"
   on public.items for update
   to anon
-  using (statut = 'disponible');
+  using (statut = 'disponible')
+  with check (true);
+
+-- GRANT nécessaire pour que le rôle anon puisse exécuter UPDATE (RLS seul ne suffit pas)
+grant update (statut, reserve_par) on public.items to anon;
 
 -- 5. CRUD complet pour les parents authentifiés
 create policy "Admin lecture"
