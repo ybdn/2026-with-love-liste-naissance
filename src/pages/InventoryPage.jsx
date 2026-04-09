@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
+import GuestNavTabs from '../components/GuestNavTabs'
 
 const CATEGORIES = [
   { key: 'vêtements', label: 'vêtements 👶' },
@@ -13,28 +13,6 @@ const CATEGORIES = [
   { key: 'accessoires', label: 'accessoires 🎒' },
   { key: 'autre', label: 'autre 📦' },
 ]
-
-function StockBadge({ quantite }) {
-  if (quantite === 0) {
-    return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-rose/15 text-rose">
-        Manque
-      </span>
-    )
-  }
-  if (quantite <= 2) {
-    return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-warm/15 text-warm">
-        Peut manquer
-      </span>
-    )
-  }
-  return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-sage/15 text-sage">
-      Bien fourni
-    </span>
-  )
-}
 
 export default function InventoryPage() {
   const [items, setItems] = useState([])
@@ -65,14 +43,8 @@ export default function InventoryPage() {
       <Header />
 
       <div className="max-w-5xl mx-auto px-4 pb-12">
-        <div className="mb-5 animate-fade-in-up">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1.5 text-warm text-sm hover:text-rose transition-colors"
-          >
-            ← Retour à la liste des cadeaux
-          </Link>
-        </div>
+
+        <GuestNavTabs />
 
         {/* Bandeau informatif */}
         <div className="bg-blush/50 border border-rose/20 rounded-2xl px-5 py-4 mb-6 animate-fade-in-up stagger-2">
@@ -80,22 +52,6 @@ export default function InventoryPage() {
             <span className="font-semibold text-text">Voici ce que nous avons déjà 📦</span><br />
             Cette liste vous aide à éviter les doublons. Si un article vous fait envie, vous pouvez tout de même l'offrir — chaque attention est la bienvenue !
           </p>
-        </div>
-
-        {/* Légende */}
-        <div className="flex flex-wrap gap-3 mb-6 animate-fade-in-up stagger-3">
-          <div className="flex items-center gap-1.5">
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-rose/15 text-rose">Manque</span>
-            <span className="text-xs text-text-light">= nous n'en avons pas</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-warm/15 text-warm">Peut manquer</span>
-            <span className="text-xs text-text-light">= quantité limitée</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-sage/15 text-sage">Bien fourni</span>
-            <span className="text-xs text-text-light">= nous en avons suffisamment</span>
-          </div>
         </div>
 
         {loading ? (
@@ -140,7 +96,6 @@ export default function InventoryPage() {
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
                             <span className="text-xs text-text-light tabular-nums">×{item.quantite}</span>
-                            <StockBadge quantite={item.quantite} />
                           </div>
                         </li>
                       ))}

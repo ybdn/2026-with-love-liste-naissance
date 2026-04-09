@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
+import GuestNavTabs from '../components/GuestNavTabs'
 import GiftCard from '../components/GiftCard'
 import ReserveModal from '../components/ReserveModal'
 
@@ -50,18 +51,14 @@ export default function GuestList() {
 
       <div className="max-w-5xl mx-auto px-4 pb-12">
 
+        <GuestNavTabs />
+
         {/* Bannière message parents */}
         <div className="bg-blush/50 border border-rose/20 rounded-2xl px-5 py-4 mb-5 animate-fade-in-up stagger-2">
           <p className="text-sm text-warm leading-relaxed">
             <span className="font-semibold text-text">Un petit mot de notre part 💛</span><br />
             Cette liste nous sert aussi de référence pour nos propres achats — pas besoin de tout offrir ! Chaque geste compte, et nous valorisons tout particulièrement la <span className="font-medium">seconde main</span> : n'hésitez pas à chercher ces articles d'occasion si vous le souhaitez.
           </p>
-          <div className="mt-3 pt-3 border-t border-rose/10">
-            <Link to="/inventaire"
-              className="inline-flex items-center gap-1.5 text-warm text-sm font-medium hover:text-rose transition-colors">
-              📋 Ce qu'on a déjà →
-            </Link>
-          </div>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm mb-6 animate-fade-in-up stagger-3">
