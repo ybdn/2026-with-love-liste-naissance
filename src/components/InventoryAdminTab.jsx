@@ -15,8 +15,13 @@ function AddItemSheet({ onClose, onSaved }) {
   const handleSave = async () => {
     if (!form.nom.trim()) return
     setSaving(true)
-    await supabase.from('inventory_items').insert(form)
+    const { error } = await supabase.from('inventory_items').insert(form)
     setSaving(false)
+    if (error) {
+      console.error('Erreur insert inventory:', error)
+      alert(`Erreur : ${error.message}`)
+      return
+    }
     onSaved()
   }
 
