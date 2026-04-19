@@ -5,11 +5,8 @@ export const VETEMENTS_CATEGORIES = [
   { key: 'hauts-mc',     label: 'Hauts MC',     emoji: '👕', groupe: 'hauts',        manches: 'manches courtes' },
   { key: 'bas',          label: 'Bas',          emoji: '👖', groupe: 'bas',          manches: null },
   { key: 'pyjamas',      label: 'Pyjamas',      emoji: '🌙', groupe: 'pyjamas',      manches: null },
-  { key: 'grenouilleres',label: 'Grenouillères',emoji: '🐸', groupe: 'grenouilleres',manches: null },
   { key: 'ensembles',    label: 'Ensembles',    emoji: '✨', groupe: 'ensembles',    manches: null },
   { key: 'blousons',     label: 'Blousons',     emoji: '🧥', groupe: 'blousons',     manches: null },
-  { key: 'gilets',       label: 'Gilets',       emoji: '🎽', groupe: 'gilets',       manches: null },
-  { key: 'chemises',     label: 'Chemises',     emoji: '👔', groupe: 'chemises',     manches: null },
   { key: 'chaussettes',  label: 'Chaussettes',  emoji: '🧦', groupe: 'chaussettes',  manches: null },
   { key: 'chaussons',    label: 'Chaussons',    emoji: '👟', groupe: 'chaussons',    manches: null },
   { key: 'gants',        label: 'Gants',        emoji: '🧤', groupe: 'gants',        manches: null },
@@ -28,6 +25,6 @@ export const AUTRES_CATEGORIES = [
 export const CATEGORIES = [...VETEMENTS_CATEGORIES, ...AUTRES_CATEGORIES]
 
 export const GROUPES_VETEMENTS = [
-  'bodies', 'hauts', 'bas', 'pyjamas', 'grenouilleres', 'ensembles',
-  'blousons', 'gilets', 'chemises', 'chaussettes', 'chaussons', 'gants', 'bonnets',
+  'bodies', 'hauts', 'bas', 'pyjamas', 'ensembles',
+  'blousons', 'chaussettes', 'chaussons', 'gants', 'bonnets',
 ]

@@ -72,8 +72,8 @@ create table public.inventory_items (
   categorie text not null check (categorie in (
     'bodies-ml', 'bodies-mc',
     'hauts-ml', 'hauts-mc',
-    'bas', 'pyjamas', 'grenouilleres', 'ensembles',
-    'blousons', 'gilets', 'chemises',
+    'bas', 'pyjamas', 'ensembles',
+    'blousons',
     'chaussettes', 'chaussons', 'gants', 'bonnets',
     'jouets', 'puériculture', 'bain', 'chambre', 'accessoires', 'autre',
     'vêtements', 'bodies'
