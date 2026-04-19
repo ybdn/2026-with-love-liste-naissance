@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { CATEGORIES, VETEMENTS_CATEGORIES, AUTRES_CATEGORIES, GROUPES_VETEMENTS } from '../lib/inventoryCategories'
 
-const TAILLES = ['naissance', '0-3 mois', '3-6 mois', '6-12 mois', '12-18 mois', '18-24 mois', '2 ans', 'taille unique']
+const TAILLES = ['naissance', '0 mois', '1 mois', '0-3 mois', '3 mois', '3-6 mois', '6 mois', '6-12 mois', '8 mois', '12 mois', '12-18 mois', '18 mois', '18-24 mois', '24 mois', '2 ans', 'taille unique']
 
 const EMPTY_FORM = { categorie: 'bodies-ml', nom: '', taille: '', quantite: 1, notes: '' }
 
@@ -150,6 +150,58 @@ function AddItemSheet({ onClose, onSaved }) {
   )
 }
 
+const TAILLES_ORDER = ['naissance', '0 mois', '1 mois', '0-3 mois', '3 mois', '3-6 mois', '6 mois', '6-12 mois', '8 mois', '12 mois', '12-18 mois', '18 mois', '18-24 mois', '24 mois', '2 ans', 'taille unique']
+
+function tailleSortIndex(t) {
+  const idx = TAILLES_ORDER.indexOf(t)
+  return idx === -1 ? 999 : idx
+}
+
+function buildGroupedByTaille(items) {
+  const grouped = {}
+  items.forEach((item) => {
+    const t = item.taille || '—'
+    if (!grouped[t]) grouped[t] = []
+    grouped[t].push(item)
+  })
+
+  const rows = []
+  const tailles = Object.keys(grouped).sort((a, b) => tailleSortIndex(a) - tailleSortIndex(b))
+  tailles.forEach((t) => {
+    rows.push({ type: 'groupe-header', label: t, emoji: '📏', key: `taille-${t}` })
+    grouped[t].forEach((item) => rows.push({ type: 'item', item }))
+  })
+  return rows
+}
+
+function buildGroupedByCatTaille(items) {
+  const rows = []
+
+  // Construire un map catégorie → taille → items
+  const byCat = {}
+  items.forEach((item) => {
+    const cat = item.categorie
+    const t = item.taille || '—'
+    if (!byCat[cat]) byCat[cat] = {}
+    if (!byCat[cat][t]) byCat[cat][t] = []
+    byCat[cat][t].push(item)
+  })
+
+  // Parcourir dans l'ordre des catégories connues
+  const allCats = [...VETEMENTS_CATEGORIES, ...AUTRES_CATEGORIES]
+  allCats.forEach((cat) => {
+    if (!byCat[cat.key]) return
+    rows.push({ type: 'groupe-header', label: cat.label.replace(/ ML| MC/, ''), emoji: cat.emoji, key: `cat-${cat.key}` })
+
+    const tailles = Object.keys(byCat[cat.key]).sort((a, b) => tailleSortIndex(a) - tailleSortIndex(b))
+    tailles.forEach((t) => {
+      rows.push({ type: 'sous-header', label: t, key: `${cat.key}-${t}` })
+      byCat[cat.key][t].forEach((item) => rows.push({ type: 'item', item }))
+    })
+  })
+  return rows
+}
+
 function buildGroupedDisplay(items) {
   const grouped = items.reduce((acc, item) => {
     const cat = item.categorie
@@ -196,7 +248,8 @@ export default function InventoryAdminTab() {
   const [editingId, setEditingId] = useState(null)
   const [editingData, setEditingData] = useState({})
   const [savedId, setSavedId] = useState(null)
-  const [groupByCategory, setGroupByCategory] = useState(true)
+  // 'cat' | 'taille' | 'cat-taille' | 'flat'
+  const [groupMode, setGroupMode] = useState('cat')
   const [showAddSheet, setShowAddSheet] = useState(false)
 
   const fetchItems = async () => {
@@ -380,7 +433,42 @@ export default function InventoryAdminTab() {
     return <div className="py-12 text-center text-text-light text-sm">Chargement…</div>
   }
 
-  const groupedDisplay = buildGroupedDisplay(items)
+  const GROUP_MODES = [
+    { key: 'cat',       label: 'Catégorie' },
+    { key: 'taille',    label: 'Taille' },
+    { key: 'cat-taille',label: 'Cat. / Taille' },
+    { key: 'flat',      label: 'Tout' },
+  ]
+
+  const activeRows = groupMode === 'cat'
+    ? buildGroupedDisplay(items)
+    : groupMode === 'taille'
+    ? buildGroupedByTaille(items)
+    : groupMode === 'cat-taille'
+    ? buildGroupedByCatTaille(items)
+    : null
+
+  const renderRows = (rows) => rows.map((row) => {
+    if (row.type === 'groupe-header') {
+      return (
+        <tr key={row.key} className="bg-blush/20">
+          <td colSpan={6} className="px-3 py-2 text-xs font-semibold text-warm uppercase tracking-wide">
+            {row.emoji} {row.label}
+          </td>
+        </tr>
+      )
+    }
+    if (row.type === 'sous-header') {
+      return (
+        <tr key={row.key} className="bg-blush/10">
+          <td colSpan={6} className="px-4 py-1.5 text-[11px] italic text-text-light/80">
+            {row.label}
+          </td>
+        </tr>
+      )
+    }
+    return renderRow(row.item)
+  })
 
   return (
     <div>
@@ -388,14 +476,19 @@ export default function InventoryAdminTab() {
         <p className="text-sm text-text-light">
           {items.length} article{items.length !== 1 ? 's' : ''}
         </p>
-        <button
-          onClick={() => setGroupByCategory(!groupByCategory)}
-          className={`text-xs px-3 py-1.5 rounded-full transition-colors cursor-pointer ${
-            groupByCategory ? 'bg-rose/15 text-rose' : 'bg-blush text-text-light hover:bg-blush/80'
-          }`}
-        >
-          Grouper par catégorie
-        </button>
+        <div className="flex gap-1 bg-blush/40 rounded-full p-0.5">
+          {GROUP_MODES.map((m) => (
+            <button
+              key={m.key}
+              onClick={() => setGroupMode(m.key)}
+              className={`text-xs px-2.5 py-1 rounded-full transition-colors cursor-pointer ${
+                groupMode === m.key ? 'bg-white text-rose shadow-sm font-medium' : 'text-text-light hover:text-text'
+              }`}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm overflow-hidden mb-4">
@@ -404,32 +497,10 @@ export default function InventoryAdminTab() {
             <div className="py-12 text-center text-text-light text-sm">
               Aucun article. Ajoutez-en un avec le bouton ci-dessous.
             </div>
-          ) : groupByCategory ? (
+          ) : activeRows ? (
             <table className="w-full">
               {tableHeader}
-              <tbody>
-                {groupedDisplay.map((row) => {
-                  if (row.type === 'groupe-header') {
-                    return (
-                      <tr key={row.key} className="bg-blush/20">
-                        <td colSpan={6} className="px-3 py-2 text-xs font-semibold text-warm uppercase tracking-wide">
-                          {row.emoji} {row.label}
-                        </td>
-                      </tr>
-                    )
-                  }
-                  if (row.type === 'sous-header') {
-                    return (
-                      <tr key={row.key} className="bg-blush/10">
-                        <td colSpan={6} className="px-4 py-1.5 text-[11px] italic text-text-light/80">
-                          {row.label}
-                        </td>
-                      </tr>
-                    )
-                  }
-                  return renderRow(row.item)
-                })}
-              </tbody>
+              <tbody>{renderRows(activeRows)}</tbody>
             </table>
           ) : (
             <table className="w-full">
