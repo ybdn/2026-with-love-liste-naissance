@@ -12,7 +12,7 @@ function AddItemSheet({ onClose, onSaved }) {
 
   const set = (key, value) => setForm((f) => ({ ...f, [key]: value }))
 
-  const handleSave = async () => {
+  const handleSave = async (andNew = false) => {
     if (!form.nom.trim()) return
     setSaving(true)
     const { error } = await supabase.from('inventory_items').insert(form)
@@ -22,7 +22,11 @@ function AddItemSheet({ onClose, onSaved }) {
       alert(`Erreur : ${error.message}`)
       return
     }
-    onSaved()
+    if (andNew) {
+      setForm({ ...EMPTY_FORM, categorie: form.categorie, taille: form.taille })
+    } else {
+      onSaved()
+    }
   }
 
   const renderCatButton = (c) => (
@@ -143,13 +147,22 @@ function AddItemSheet({ onClose, onSaved }) {
           />
         </div>
 
-        <button
-          onClick={handleSave}
-          disabled={!form.nom.trim() || saving}
-          className="w-full bg-sage text-white font-medium py-3.5 rounded-xl hover:bg-sage/90 transition-colors disabled:opacity-40 cursor-pointer"
-        >
-          {saving ? 'Enregistrement…' : 'Ajouter à l\'inventaire'}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => handleSave(false)}
+            disabled={!form.nom.trim() || saving}
+            className="flex-1 bg-sage text-white font-medium py-3.5 rounded-xl hover:bg-sage/90 transition-colors disabled:opacity-40 cursor-pointer"
+          >
+            {saving ? 'Enregistrement…' : 'Ajouter'}
+          </button>
+          <button
+            onClick={() => handleSave(true)}
+            disabled={!form.nom.trim() || saving}
+            className="flex-1 bg-blush text-warm font-medium py-3.5 rounded-xl hover:bg-blush/80 transition-colors disabled:opacity-40 cursor-pointer"
+          >
+            + Créer un autre
+          </button>
+        </div>
       </div>
     </div>
   )
