@@ -70,7 +70,13 @@ create table public.inventory_items (
   id uuid default gen_random_uuid() primary key,
   created_at timestamptz default now(),
   categorie text not null check (categorie in (
-    'vêtements', 'bodies', 'jouets', 'puériculture', 'bain', 'chambre', 'accessoires', 'autre'
+    'bodies-ml', 'bodies-mc',
+    'hauts-ml', 'hauts-mc',
+    'bas', 'pyjamas', 'grenouilleres', 'ensembles',
+    'blousons', 'gilets', 'chemises',
+    'chaussettes', 'chaussons', 'gants', 'bonnets',
+    'jouets', 'puériculture', 'bain', 'chambre', 'accessoires', 'autre',
+    'vêtements', 'bodies'
   )),
   nom text not null,
   taille text default null,
