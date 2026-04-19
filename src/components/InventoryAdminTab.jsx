@@ -1,20 +1,10 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-
-const CATEGORIES = [
-  { key: 'vêtements', label: 'vêtements', emoji: '👶' },
-  { key: 'bodies', label: 'bodies', emoji: '🧦' },
-  { key: 'jouets', label: 'jouets', emoji: '🧸' },
-  { key: 'puériculture', label: 'puéri.', emoji: '🍼' },
-  { key: 'bain', label: 'bain', emoji: '🛁' },
-  { key: 'chambre', label: 'chambre', emoji: '🛏' },
-  { key: 'accessoires', label: 'access.', emoji: '🎒' },
-  { key: 'autre', label: 'autre', emoji: '📦' },
-]
+import { CATEGORIES, VETEMENTS_CATEGORIES, AUTRES_CATEGORIES, GROUPES_VETEMENTS } from '../lib/inventoryCategories'
 
 const TAILLES = ['naissance', '0-3 mois', '3-6 mois', '6-12 mois', '12-18 mois', '18-24 mois', '2 ans', 'taille unique']
 
-const EMPTY_FORM = { categorie: 'bodies', nom: '', taille: '', quantite: 1, notes: '' }
+const EMPTY_FORM = { categorie: 'bodies-ml', nom: '', taille: '', quantite: 1, notes: '' }
 
 function AddItemSheet({ onClose, onSaved }) {
   const [form, setForm] = useState({ ...EMPTY_FORM })
@@ -29,6 +19,28 @@ function AddItemSheet({ onClose, onSaved }) {
     setSaving(false)
     onSaved()
   }
+
+  const renderCatButton = (c) => (
+    <button
+      key={c.key}
+      onClick={() => set('categorie', c.key)}
+      className={`flex flex-col items-center gap-1 py-2.5 rounded-xl transition-all cursor-pointer ${
+        form.categorie === c.key
+          ? 'bg-rose/10 ring-1 ring-rose/30'
+          : 'bg-blush/30 hover:bg-blush/60'
+      }`}
+    >
+      <span className="text-lg leading-none">{c.emoji}</span>
+      <span className={`text-[10px] font-medium leading-tight text-center ${form.categorie === c.key ? 'text-rose' : 'text-text-light'}`}>
+        {c.label}
+      </span>
+      {c.manches && (
+        <span className={`text-[8px] leading-none ${form.categorie === c.key ? 'text-rose/70' : 'text-text-light/50'}`}>
+          {c.manches === 'manches longues' ? 'ML' : 'MC'}
+        </span>
+      )}
+    </button>
+  )
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end">
@@ -49,26 +61,19 @@ function AddItemSheet({ onClose, onSaved }) {
           </button>
         </div>
 
-        {/* Catégorie */}
+        {/* Catégorie — Vêtements */}
         <div className="mb-5">
-          <label className="text-xs font-medium text-text-light uppercase tracking-wide mb-2.5 block">Catégorie</label>
+          <label className="text-xs font-medium text-text-light uppercase tracking-wide mb-2 block">Vêtements</label>
           <div className="grid grid-cols-4 gap-2">
-            {CATEGORIES.map((c) => (
-              <button
-                key={c.key}
-                onClick={() => set('categorie', c.key)}
-                className={`flex flex-col items-center gap-1 py-3 rounded-xl transition-all cursor-pointer ${
-                  form.categorie === c.key
-                    ? 'bg-rose/10 ring-1 ring-rose/30'
-                    : 'bg-blush/30 hover:bg-blush/60'
-                }`}
-              >
-                <span className="text-xl leading-none">{c.emoji}</span>
-                <span className={`text-[10px] font-medium leading-tight text-center ${form.categorie === c.key ? 'text-rose' : 'text-text-light'}`}>
-                  {c.label}
-                </span>
-              </button>
-            ))}
+            {VETEMENTS_CATEGORIES.map(renderCatButton)}
+          </div>
+        </div>
+
+        {/* Catégorie — Autres */}
+        <div className="mb-5">
+          <label className="text-xs font-medium text-text-light uppercase tracking-wide mb-2 block">Autres</label>
+          <div className="grid grid-cols-4 gap-2">
+            {AUTRES_CATEGORIES.map(renderCatButton)}
           </div>
         </div>
 
@@ -145,6 +150,46 @@ function AddItemSheet({ onClose, onSaved }) {
   )
 }
 
+function buildGroupedDisplay(items) {
+  const grouped = items.reduce((acc, item) => {
+    const cat = item.categorie
+    if (!acc[cat]) acc[cat] = []
+    acc[cat].push(item)
+    return acc
+  }, {})
+
+  const rows = []
+
+  // Section vêtements — groupée par famille (groupe)
+  GROUPES_VETEMENTS.forEach((groupe) => {
+    const cats = VETEMENTS_CATEGORIES.filter((c) => c.groupe === groupe)
+    const groupeItems = cats.flatMap((c) => grouped[c.key] || [])
+    if (!groupeItems.length) return
+
+    const firstCat = cats[0]
+    rows.push({ type: 'groupe-header', label: firstCat.label.replace(/ ML| MC/, ''), emoji: firstCat.emoji, key: groupe })
+
+    cats.forEach((cat) => {
+      const catItems = grouped[cat.key] || []
+      if (!catItems.length) return
+      if (cat.manches) {
+        rows.push({ type: 'sous-header', label: cat.manches, key: `${cat.key}-header` })
+      }
+      catItems.forEach((item) => rows.push({ type: 'item', item }))
+    })
+  })
+
+  // Section autres catégories
+  AUTRES_CATEGORIES.forEach((cat) => {
+    const catItems = grouped[cat.key] || []
+    if (!catItems.length) return
+    rows.push({ type: 'groupe-header', label: cat.label, emoji: cat.emoji, key: cat.key })
+    catItems.forEach((item) => rows.push({ type: 'item', item }))
+  })
+
+  return rows
+}
+
 export default function InventoryAdminTab() {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
@@ -216,9 +261,16 @@ export default function InventoryAdminTab() {
               onChange={(e) => setEditingData({ ...editingData, categorie: e.target.value })}
               className="w-full border border-blush rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-sage/30"
             >
-              {CATEGORIES.map((c) => (
-                <option key={c.key} value={c.key}>{c.emoji} {c.label}</option>
-              ))}
+              <optgroup label="Vêtements">
+                {VETEMENTS_CATEGORIES.map((c) => (
+                  <option key={c.key} value={c.key}>{c.emoji} {c.label}</option>
+                ))}
+              </optgroup>
+              <optgroup label="Autres">
+                {AUTRES_CATEGORIES.map((c) => (
+                  <option key={c.key} value={c.key}>{c.emoji} {c.label}</option>
+                ))}
+              </optgroup>
             </select>
           </td>
           <td className="px-3 py-2">
@@ -311,13 +363,6 @@ export default function InventoryAdminTab() {
     )
   }
 
-  const grouped = items.reduce((acc, item) => {
-    const cat = item.categorie
-    if (!acc[cat]) acc[cat] = []
-    acc[cat].push(item)
-    return acc
-  }, {})
-
   const tableHeader = (
     <thead>
       <tr className="border-b border-blush/60">
@@ -334,6 +379,8 @@ export default function InventoryAdminTab() {
   if (loading) {
     return <div className="py-12 text-center text-text-light text-sm">Chargement…</div>
   }
+
+  const groupedDisplay = buildGroupedDisplay(items)
 
   return (
     <div>
@@ -361,19 +408,26 @@ export default function InventoryAdminTab() {
             <table className="w-full">
               {tableHeader}
               <tbody>
-                {CATEGORIES.map((cat) => {
-                  const catItems = grouped[cat.key]
-                  if (!catItems?.length) return null
-                  return (
-                    <>
-                      <tr key={`cat-${cat.key}`} className="bg-blush/20">
+                {groupedDisplay.map((row) => {
+                  if (row.type === 'groupe-header') {
+                    return (
+                      <tr key={row.key} className="bg-blush/20">
                         <td colSpan={6} className="px-3 py-2 text-xs font-semibold text-warm uppercase tracking-wide">
-                          {cat.emoji} {cat.label}
+                          {row.emoji} {row.label}
                         </td>
                       </tr>
-                      {catItems.map(renderRow)}
-                    </>
-                  )
+                    )
+                  }
+                  if (row.type === 'sous-header') {
+                    return (
+                      <tr key={row.key} className="bg-blush/10">
+                        <td colSpan={6} className="px-4 py-1.5 text-[11px] italic text-text-light/80">
+                          {row.label}
+                        </td>
+                      </tr>
+                    )
+                  }
+                  return renderRow(row.item)
                 })}
               </tbody>
             </table>

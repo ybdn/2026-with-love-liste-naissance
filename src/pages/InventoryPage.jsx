@@ -2,17 +2,63 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
 import GuestNavTabs from '../components/GuestNavTabs'
+import { VETEMENTS_CATEGORIES, AUTRES_CATEGORIES, GROUPES_VETEMENTS } from '../lib/inventoryCategories'
 
-const CATEGORIES = [
-  { key: 'vêtements', label: 'vêtements 👶' },
-  { key: 'bodies', label: 'bodies 🧦' },
-  { key: 'jouets', label: 'jouets 🧸' },
-  { key: 'puériculture', label: 'puériculture 🍼' },
-  { key: 'bain', label: 'bain 🛁' },
-  { key: 'chambre', label: 'chambre 🛏' },
-  { key: 'accessoires', label: 'accessoires 🎒' },
-  { key: 'autre', label: 'autre 📦' },
-]
+function buildGroupedDisplay(items) {
+  const grouped = items.reduce((acc, item) => {
+    const cat = item.categorie
+    if (!acc[cat]) acc[cat] = []
+    acc[cat].push(item)
+    return acc
+  }, {})
+
+  const sections = []
+
+  GROUPES_VETEMENTS.forEach((groupe) => {
+    const cats = VETEMENTS_CATEGORIES.filter((c) => c.groupe === groupe)
+    const groupeItems = cats.flatMap((c) => grouped[c.key] || [])
+    if (!groupeItems.length) return
+
+    const firstCat = cats[0]
+    const label = firstCat.label.replace(/ ML| MC/, '')
+    const subsections = []
+
+    cats.forEach((cat) => {
+      const catItems = grouped[cat.key] || []
+      if (!catItems.length) return
+      subsections.push({ manches: cat.manches, items: catItems })
+    })
+
+    sections.push({ key: groupe, label, emoji: firstCat.emoji, subsections })
+  })
+
+  AUTRES_CATEGORIES.forEach((cat) => {
+    const catItems = grouped[cat.key] || []
+    if (!catItems.length) return
+    sections.push({ key: cat.key, label: cat.label, emoji: cat.emoji, subsections: [{ manches: null, items: catItems }] })
+  })
+
+  return sections
+}
+
+function ItemRow({ item }) {
+  return (
+    <li className="px-4 py-3 flex items-start justify-between gap-3">
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-text">{item.nom}</p>
+        {item.taille && (
+          <p className="text-xs text-text-light mt-0.5">{item.taille}</p>
+        )}
+        {item.notes && (
+          <p className="text-xs text-text-light/70 mt-0.5 italic">{item.notes}</p>
+        )}
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        <span className="text-xs text-text-light tabular-nums">×{item.quantite}</span>
+      </div>
+    </li>
+  )
+}
 
 export default function InventoryPage() {
   const [items, setItems] = useState([])
@@ -31,12 +77,7 @@ export default function InventoryPage() {
       })
   }, [])
 
-  const grouped = items.reduce((acc, item) => {
-    const cat = item.categorie
-    if (!acc[cat]) acc[cat] = []
-    acc[cat].push(item)
-    return acc
-  }, {})
+  const sections = buildGroupedDisplay(items)
 
   return (
     <div className="min-h-screen">
@@ -73,37 +114,29 @@ export default function InventoryPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            {CATEGORIES.map((cat, catIdx) => {
-              const catItems = grouped[cat.key]
-              if (!catItems?.length) return null
-              return (
-                <div key={cat.key} className={`animate-fade-in-up stagger-${Math.min(catIdx + 1, 5)}`}>
-                  <h2 className="font-display text-base font-semibold text-text mb-3 capitalize">
-                    {cat.label}
-                  </h2>
-                  <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-                    <ul className="divide-y divide-blush/40">
-                      {catItems.map((item) => (
-                        <li key={item.id} className="px-4 py-3 flex items-start justify-between gap-3">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-text">{item.nom}</p>
-                            {item.taille && (
-                              <p className="text-xs text-text-light mt-0.5">{item.taille}</p>
-                            )}
-                            {item.notes && (
-                              <p className="text-xs text-text-light/70 mt-0.5 italic">{item.notes}</p>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2 shrink-0">
-                            <span className="text-xs text-text-light tabular-nums">×{item.quantite}</span>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+            {sections.map((section, sIdx) => (
+              <div key={section.key} className={`animate-fade-in-up stagger-${Math.min(sIdx + 1, 5)}`}>
+                <h2 className="font-display text-base font-semibold text-text mb-3 capitalize">
+                  {section.emoji} {section.label}
+                </h2>
+                <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+                  {section.subsections.map((sub, subIdx) => (
+                    <div key={subIdx}>
+                      {sub.manches && (
+                        <p className="px-4 pt-3 pb-1 text-xs font-medium text-text-light/70 italic">
+                          {sub.manches}
+                        </p>
+                      )}
+                      <ul className="divide-y divide-blush/40">
+                        {sub.items.map((item) => (
+                          <ItemRow key={item.id} item={item} />
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
                 </div>
-              )
-            })}
+              </div>
+            ))}
           </div>
         )}
       </div>
