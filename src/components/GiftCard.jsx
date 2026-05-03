@@ -93,7 +93,7 @@ export default function GiftCard({ gift, onReserve, isAdmin, index = 0 }) {
 
         {isAdmin && reserved && (
           <p className="text-center text-sage text-xs font-medium italic">
-            Réservé par un proche
+            Réservé par {gift.reserve_par || 'un proche'}
           </p>
         )}
       </div>
